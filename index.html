@@ -1,0 +1,114 @@
+<!DOCTYPE HTML>
+<meta name="viewport" content="width=device-width">
+<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Roboto:500" rel="stylesheet">
+<style>
+body {
+    text-align: right;
+    font-family: 'Roboto', sans-serif;
+    font-size: 8vmin;
+    font-style: normal;
+    font-weight: 300;
+    color: white;
+    background: black;
+    -webkit-font-smoothing: antialiased;
+}
+#date {
+    font-size: 8vmin;
+}
+#time {
+    font-weight: 500;
+    font-size: 30vmin;
+}
+#temp {
+    font-size: 8vmin;
+    padding-top: 10vmin;
+    text-align: right;
+    float: right;
+}
+.tempLabel {
+    padding-right: 5vmin;
+}
+#dayOfMonthOrdinal {
+    font-size: 6vmin;
+    vertical-align: super;
+}
+</style>
+<body>
+<div id="date"><span id="day">Saturday</span>, <span id="month">Sep</span> <span id="dayOfMonth">10</span><span id="dayOfMonthOrdinal">st</span></div>
+<div id="time">
+    <span id="hour">5</span><span id="colon">:</span><span id="minute">21</span>
+</div>
+<table id="temp">
+    <tr><td class="tempLabel">current</td><td id="currentTemp">65&deg;F (20&deg;C)</td></tr>
+    <tr><td class="tempLabel">high</td><td id="highTemp">65&deg;F (20&deg;C)</td></tr>
+    <tr><td class="tempLabel">low</td><td id="lowTemp">65&deg;F (20&deg;C)</td></tr>
+</table>
+<script>
+var colonVisible = true;
+function updateTime() {
+    colonVisible = !colonVisible;
+    colon.style.color = colonVisible ? 'white' : 'black';
+    var currentDate = new Date();
+    hour.innerText = currentDate.getHours();
+    var currentMinutes = currentDate.getMinutes();
+    minute.innerText = currentMinutes < 10 ? '0' + currentMinutes : currentMinutes;
+
+}
+window.setInterval(updateTime, 750);
+updateTime();
+
+function dayOfWeekString(date) {
+    switch(date.getDay()) {
+        case 0: return 'Sunday';
+        case 1: return 'Monday';
+        case 2: return 'Tuesday';
+        case 3: return 'Wednesday';
+        case 4: return 'Thursday';
+        case 5: return 'Friday';
+        default: return 'Saturday';
+    }
+}
+
+function monthString(date) {
+    switch(date.getMonth()) {
+        case 0: return 'Jan';
+        case 1: return 'Feb';
+        case 2: return 'Mar';
+        case 3: return 'Apr';
+        case 4: return 'May';
+        case 5: return 'Jun';
+        case 6: return 'Jul';
+        case 7: return 'Aug';
+        case 8: return 'Sept';
+        case 9: return 'Oct';
+        case 10: return 'Nov';
+        default: return 'Dec';
+    }
+}
+
+function dayOfMonthString(date) {
+    return date.getDate();
+}
+
+// Credit for this ordinal code:
+// https://ecommerce.shopify.com/c/ecommerce-design/t/ordinal-number-in-javascript-1st-2nd-3rd-4th-29259
+var ordinals = ['th', 'st', 'nd', 'rd'];
+function dayOfMonthOrdinalString(date) {
+    var number = date.getDate();
+    var v = number % 100;
+    return ordinals[(v-20)%10]||ordinals[v]||ordinals[0];
+}
+
+function updateDate() {
+    var currentDate = new Date();
+    day.innerText = dayOfWeekString(currentDate);
+    month.innerText = monthString(currentDate);
+    dayOfMonth.innerText = dayOfMonthString(currentDate);
+    dayOfMonthOrdinal.innerText = dayOfMonthOrdinalString(currentDate);
+}
+window.setInterval(updateDate, 60*1000);
+updateDate();
+</script>
+</body>
