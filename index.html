@@ -12,7 +12,7 @@ body {
     font-weight: 300;
     color: white;
     background: black;
-    -webkit-font-smoothing: antialiased;
+    -webkit-font-smoothing: subpixel-antialiased;
 }
 #date {
     font-size: 8vmin;
@@ -54,7 +54,6 @@ function updateTime() {
     hour.innerText = currentDate.getHours();
     var currentMinutes = currentDate.getMinutes();
     minute.innerText = currentMinutes < 10 ? '0' + currentMinutes : currentMinutes;
-
 }
 
 function dayOfWeekString(date) {
