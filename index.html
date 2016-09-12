@@ -56,8 +56,6 @@ function updateTime() {
     minute.innerText = currentMinutes < 10 ? '0' + currentMinutes : currentMinutes;
 
 }
-window.setInterval(updateTime, 750);
-updateTime();
 
 function dayOfWeekString(date) {
     switch(date.getDay()) {
@@ -108,6 +106,10 @@ function updateDate() {
     dayOfMonth.innerText = dayOfMonthString(currentDate);
     dayOfMonthOrdinal.innerText = dayOfMonthOrdinalString(currentDate);
 }
+
+// Init routine.
+window.setInterval(updateTime, 750);
+updateTime();
 window.setInterval(updateDate, 60*1000);
 updateDate();
 </script>
