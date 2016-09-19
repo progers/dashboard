@@ -30,6 +30,32 @@
     .temperatureLabel {
         padding-right: 5vmin;
     }
+    .wunderground {
+        padding-top: 10vmin;
+        /* The Wunderground API TOS requires attribution. */
+        background-image: url('wundergroundLogo.png');
+        background-position: bottom right;
+        background-repeat: no-repeat;
+        background-size: 90px auto;
+        padding-bottom: 23px;
+    }
+    .forecastIcon {
+        width: 15vmin;
+        height: 15vmin;
+        padding: 1vmin;
+    }
+    .forecastData {
+        float: right;
+    }
+    .forecastDay {
+        font-size: 3.3vmin;
+    }
+    .forecastHigh {
+        font-size: 5vmin;
+    }
+    .forecastLow {
+        font-size: 5vmin;
+    }
 </style>
 <div class="date">
     <span id="day">Saturday</span>, <span id="month">Sep</span> <span id="dayOfMonth">10</span><span id="dayOfMonthOrdinal">st</span>
@@ -37,11 +63,32 @@
 <div class="time">
     <span id="hour">5</span><span id="timeColon">:</span><span id="minute">21</span>
 </div>
-<table class="temperature">
-    <tr><td class="temperatureLabel">current</td><td id="currentTemp">65&deg;F (20&deg;C)</td></tr>
-    <tr><td class="temperatureLabel">high</td><td id="highTemp">65&deg;F (20&deg;C)</td></tr>
-    <tr><td class="temperatureLabel">low</td><td id="lowTemp">65&deg;F (20&deg;C)</td></tr>
-</table>
+<div class="wunderground">
+    <div id="today" class="forecast">
+        <img id="forecastTodayIcon" class="forecastIcon">
+        <div class="forecastData">
+            <div id="forecastTodayDay" class="forecastDay"></div>
+            <div class="forecastHigh">
+                <span id="forecastTodayHighF"></span>&deg;F (<span id="forecastTodayHighC"></span>&deg;C)
+            </div>
+            <div class="forecastLow">
+                <span id="forecastTodayLowF"></span>&deg;F (<span id="forecastTodayLowC"></span>&deg;C)
+            </div>
+        </div>
+    </div>
+    <div id="tomorrow" class="forecast">
+        <img id="forecastTomorrowIcon" class="forecastIcon">
+        <div class="forecastData">
+            <div id="forecastTomorrowDay" class="forecastDay"></div>
+            <div class="forecastHigh">
+                <span id="forecastTomorrowHighF"></span>&deg;F (<span id="forecastTomorrowHighC"></span>&deg;C)
+            </div>
+            <div class="forecastLow">
+                <span id="forecastTomorrowLowF"></span>&deg;F (<span id="forecastTomorrowLowC"></span>&deg;C)
+            </div>
+        </div>
+    </div>
+</div>
 <script>
     function dayOfWeekName(date) {
         switch(date.getDay()) {
@@ -80,7 +127,7 @@
         return ordinals[(v-20)%10] || ordinals[v] || ordinals[0];
     }
 
-    function update() {
+    function updateDateTime() {
         var date = new Date();
 
         day.innerText = dayOfWeekName(date);
@@ -95,6 +142,88 @@
         minute.innerText = (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
     }
 
-    window.setInterval(update, 1000); // Call update once per 1000ms
-    update(); // Immediately update once so the data is correct for the first frame.
+    // Use the Wunderground geoip service to lookup our location, falls back to new york.
+    // This has been implemented as a function so the javascript geolocation API can be subbed in.
+    function getLocation(callback) {
+        var locationUrl = 'http://api.wunderground.com/api/' + wundergroundApiKey + '/geolookup/q/autoip.json';
+        var locationRequest = new Request(locationUrl);
+        fetch(locationRequest)
+            .then(function(response) {
+                return response.json();
+            }).then(function(json) {
+                var lat = json.location.lat;
+                var lon = json.location.lon;
+                callback({lat: lat, lon: lon});
+            }).catch(function(error) {
+                console.error('Could not determine location, falling back to New York, USA.');
+                callback({lat: '40.730610', lon: '-73.935242'});
+            });
+    }
+
+    function getForecast(location, callback) {
+        var forecastUrl = 'http://api.wunderground.com/api/' + wundergroundApiKey + '/forecast/q/' + location.lat + ',' +location.lon + '.json';
+        var forecastRequest = new Request(forecastUrl);
+        fetch(forecastRequest)
+            .then(function(response) {
+                return response.json();
+            }).then(function(json) {
+                var today = json.forecast.simpleforecast.forecastday[0];
+                var tomorrow = json.forecast.simpleforecast.forecastday[1];
+                callback({
+                    today: {
+                        day: today.date.weekday,
+                        highF: today.high.fahrenheit, highC: today.high.celsius,
+                        lowF: today.high.fahrenheit, lowC: today.high.celsius,
+                        icon: today.icon
+                    },
+                    tomorrow: {
+                        day: tomorrow.date.weekday,
+                        highF: tomorrow.high.fahrenheit, highC: tomorrow.high.celsius,
+                        lowF: tomorrow.high.fahrenheit, lowC: tomorrow.high.celsius,
+                        icon: tomorrow.icon
+                    }
+                });
+            }).catch(function(error) {
+                console.error('Could not determine weather, falling back to dummy data.');
+                callback({
+                    today: {
+                        day: 'Someday',
+                        highF: '0', highC: '0',
+                        lowF: '0', lowC: '0',
+                        icon: 'tstorms'
+                    },
+                    tomorrow: {
+                        day: 'Someday',
+                        highF: '0', highC: '0',
+                        lowF: '0', lowC: '0',
+                        icon: 'cloudy'
+                    }
+                });
+            });
+    }
+
+    function updateWeather() {
+        getLocation(function(location) {
+            getForecast(location, function(forecast) {
+                forecastTodayIcon.src = 'http://icons.wxug.com/i/c/k/' + forecast.today.icon + '.gif';
+                forecastTodayDay.innerText = forecast.today.day;
+                forecastTodayHighF.innerText = forecast.today.highF;
+                forecastTodayHighC.innerText = forecast.today.highC;
+                forecastTodayLowF.innerText = forecast.today.lowF;
+                forecastTodayLowC.innerText = forecast.today.lowC;
+                forecastTomorrowIcon.src = 'http://icons.wxug.com/i/c/k/' + forecast.tomorrow.icon + '.gif';
+                forecastTomorrowDay.innerText = forecast.tomorrow.day;
+                forecastTomorrowHighF.innerText = forecast.tomorrow.highF;
+                forecastTomorrowHighC.innerText = forecast.tomorrow.highC;
+                forecastTomorrowLowF.innerText = forecast.tomorrow.lowF;
+                forecastTomorrowLowC.innerText = forecast.tomorrow.lowC;
+            });
+        });
+    }
+
+    window.setInterval(updateDateTime, 1000); // Update date&time once per second (1000ms).
+    updateDateTime(); // Immediately update once so the date&time is correct for the first frame.
+    var wundergroundApiKey = 'do_not_use_18dc12c420cff7c6'; // From https://www.wunderground.com/weather/api
+    window.setInterval(updateWeather, 14400000); // Update weather every 4 hours (4*60*60*1000ms).
+    updateWeather(); // Immediately update once so the weather is correct for the first frame.
 </script>
