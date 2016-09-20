@@ -71,10 +71,10 @@
         <div class="forecastData">
             <div id="forecastTodayDay" class="forecastDay"></div>
             <div class="forecastHigh">
-                <span id="forecastTodayHighF"></span>&deg;F (<span id="forecastTodayHighC"></span>&deg;C)
+                <span id="forecastTodayHigh"></span>&deg;<span class="weatherUnit">F</span>
             </div>
             <div class="forecastLow">
-                <span id="forecastTodayLowF"></span>&deg;F (<span id="forecastTodayLowC"></span>&deg;C)
+                <span id="forecastTodayLow"></span>&deg;<span class="weatherUnit">F</span>
             </div>
         </div>
     </div>
@@ -83,10 +83,10 @@
         <div class="forecastData">
             <div id="forecastTomorrowDay" class="forecastDay"></div>
             <div class="forecastHigh">
-                <span id="forecastTomorrowHighF"></span>&deg;F (<span id="forecastTomorrowHighC"></span>&deg;C)
+                <span id="forecastTomorrowHigh"></span>&deg;<span class="weatherUnit">F</span>
             </div>
             <div class="forecastLow">
-                <span id="forecastTomorrowLowF"></span>&deg;F (<span id="forecastTomorrowLowC"></span>&deg;C)
+                <span id="forecastTomorrowLow"></span>&deg;<span class="weatherUnit">F</span>
             </div>
         </div>
     </div>
@@ -144,12 +144,8 @@
         minute.innerText = (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
     }
 
-    function fahrenheitToCelsiusRounded(fahrenheit) {
-        return Math.round((fahrenheit - 32) * 5 / 9);
-    }
-
     function getForecast(callback) {
-        // From https://www.wunderground.com/weather/api
+        // API key from https://www.wunderground.com/weather/api
         var apiKey = 'do_not_use_18dc12c420cff7c6';
         var forecastUrl = 'http://api.wunderground.com/api/' + apiKey + '/forecast/q/autoip.json';
         var forecastRequest = new Request(forecastUrl);
@@ -162,14 +158,14 @@
                 callback({
                     today: {
                         day: today.date.weekday,
-                        highF: today.high.fahrenheit,
-                        lowF: today.high.fahrenheit,
+                        high: useCelsius ? today.high.celsius : today.high.fahrenheit,
+                        low: useCelsius ? today.low.celsius : today.low.fahrenheit,
                         icon: today.icon
                     },
                     tomorrow: {
                         day: tomorrow.date.weekday,
-                        highF: tomorrow.high.fahrenheit,
-                        lowF: tomorrow.high.fahrenheit,
+                        high: useCelsius ? tomorrow.high.celsius : tomorrow.high.fahrenheit,
+                        low: useCelsius ? tomorrow.low.celsius : tomorrow.low.fahrenheit,
                         icon: tomorrow.icon
                     }
                 });
@@ -178,14 +174,14 @@
                 callback({
                     today: {
                         day: 'Someday',
-                        highF: '212',
-                        lowF: '32',
+                        high: useCelsius ? '100' : '212',
+                        low: useCelsius ? '0' : '32',
                         icon: 'tstorms'
                     },
                     tomorrow: {
                         day: 'Someday',
-                        highF: '0',
-                        lowF: '0',
+                        high: useCelsius ? '21' : '70',
+                        low: useCelsius ? '18' : '65',
                         icon: 'cloudy'
                     }
                 });
@@ -196,19 +192,20 @@
         getForecast(function(forecast) {
             forecastTodayIcon.src = 'http://icons.wxug.com/i/c/k/' + forecast.today.icon + '.gif';
             forecastTodayDay.innerText = forecast.today.day;
-            forecastTodayHighF.innerText = forecast.today.highF;
-            forecastTodayHighC.innerText = fahrenheitToCelsiusRounded(forecast.today.highF);
-            forecastTodayLowF.innerText = forecast.today.lowF;
-            forecastTodayLowC.innerText = fahrenheitToCelsiusRounded(forecast.today.lowF);
+            forecastTodayHigh.innerText = forecast.today.high;
+            forecastTodayLow.innerText = forecast.today.low;
             forecastTomorrowIcon.src = 'http://icons.wxug.com/i/c/k/' + forecast.tomorrow.icon + '.gif';
             forecastTomorrowDay.innerText = forecast.tomorrow.day;
-            forecastTomorrowHighF.innerText = forecast.tomorrow.highF;
-            forecastTomorrowHighC.innerText = fahrenheitToCelsiusRounded(forecast.tomorrow.highF)
-            forecastTomorrowLowF.innerText = forecast.tomorrow.lowF;
-            forecastTomorrowLowC.innerText = fahrenheitToCelsiusRounded(forecast.tomorrow.lowF)
+            forecastTomorrowHigh.innerText = forecast.tomorrow.high;
+            forecastTomorrowLow.innerText = forecast.tomorrow.low;
+
+            var unitElements = document.getElementsByClassName('weatherUnit');
+            for (var unitElement in unitElements)
+                unitElements[unitElement].innerText = useCelsius ? 'C' : 'F';
         });
     }
 
+    var useCelsius = false;
     window.setInterval(updateDateTime, 1000); // Update date&time once per second (1000ms).
     updateDateTime(); // Immediately update once so the date&time is correct for the first frame.
     window.setInterval(updateWeather, 14400000); // Update weather every 4 hours (4*60*60*1000ms).
