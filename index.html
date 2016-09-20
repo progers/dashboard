@@ -144,6 +144,10 @@
         minute.innerText = (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
     }
 
+    function fahrenheitToCelsiusRounded(fahrenheit) {
+        return Math.round((fahrenheit - 32) * 5 / 9);
+    }
+
     function getForecast(callback) {
         // From https://www.wunderground.com/weather/api
         var apiKey = 'do_not_use_18dc12c420cff7c6';
@@ -158,14 +162,14 @@
                 callback({
                     today: {
                         day: today.date.weekday,
-                        highF: today.high.fahrenheit, highC: today.high.celsius,
-                        lowF: today.high.fahrenheit, lowC: today.high.celsius,
+                        highF: today.high.fahrenheit,
+                        lowF: today.high.fahrenheit,
                         icon: today.icon
                     },
                     tomorrow: {
                         day: tomorrow.date.weekday,
-                        highF: tomorrow.high.fahrenheit, highC: tomorrow.high.celsius,
-                        lowF: tomorrow.high.fahrenheit, lowC: tomorrow.high.celsius,
+                        highF: tomorrow.high.fahrenheit,
+                        lowF: tomorrow.high.fahrenheit,
                         icon: tomorrow.icon
                     }
                 });
@@ -174,14 +178,14 @@
                 callback({
                     today: {
                         day: 'Someday',
-                        highF: '0', highC: '0',
-                        lowF: '0', lowC: '0',
+                        highF: '212',
+                        lowF: '32',
                         icon: 'tstorms'
                     },
                     tomorrow: {
                         day: 'Someday',
-                        highF: '0', highC: '0',
-                        lowF: '0', lowC: '0',
+                        highF: '0',
+                        lowF: '0',
                         icon: 'cloudy'
                     }
                 });
@@ -193,15 +197,15 @@
             forecastTodayIcon.src = 'http://icons.wxug.com/i/c/k/' + forecast.today.icon + '.gif';
             forecastTodayDay.innerText = forecast.today.day;
             forecastTodayHighF.innerText = forecast.today.highF;
-            forecastTodayHighC.innerText = forecast.today.highC;
+            forecastTodayHighC.innerText = fahrenheitToCelsiusRounded(forecast.today.highF);
             forecastTodayLowF.innerText = forecast.today.lowF;
-            forecastTodayLowC.innerText = forecast.today.lowC;
+            forecastTodayLowC.innerText = fahrenheitToCelsiusRounded(forecast.today.lowF);
             forecastTomorrowIcon.src = 'http://icons.wxug.com/i/c/k/' + forecast.tomorrow.icon + '.gif';
             forecastTomorrowDay.innerText = forecast.tomorrow.day;
             forecastTomorrowHighF.innerText = forecast.tomorrow.highF;
-            forecastTomorrowHighC.innerText = forecast.tomorrow.highC;
+            forecastTomorrowHighC.innerText = fahrenheitToCelsiusRounded(forecast.tomorrow.highF)
             forecastTomorrowLowF.innerText = forecast.tomorrow.lowF;
-            forecastTomorrowLowC.innerText = forecast.tomorrow.lowC;
+            forecastTomorrowLowC.innerText = fahrenheitToCelsiusRounded(forecast.tomorrow.lowF)
         });
     }
 
