@@ -15,23 +15,20 @@
         -webkit-font-smoothing: subpixel-antialiased;
     }
     #dayOfMonthOrdinal {
-        font-size: 5vmin;
+        font-size: 4vmin;
         vertical-align: super;
+    }
+    .date {
+        font-size: 6vmin;
     }
     .time {
         font-weight: 500;
-        font-size: 30vmin;
-    }
-    .temperature {
-        padding-top: 10vmin;
-        text-align: right;
-        float: right;
-    }
-    .temperatureLabel {
-        padding-right: 5vmin;
+        font-size: 26vmin;
     }
     .weather {
-        padding-top: 10vmin;
+        display: inline-block;
+        position: relative;
+        text-align: center;
 
         /* The Wunderground API requires an attribution image. */
         /* https://www.wunderground.com/weather/api/d/terms.html */
@@ -41,22 +38,30 @@
         background-size: 90px auto;
         padding-bottom: 23px;
     }
+    .forecast {
+        font-size: 10vmin;
+        padding-top: 4vmin;
+        /* Leave space for icons. */
+        padding-left: 24vmin;
+        min-height: 22vmin;
+    }
     .forecastIcon {
-        width: 15vmin;
-        height: 15vmin;
-        padding: 1vmin;
-    }
-    .forecastData {
-        float: right;
-    }
-    .forecastDay {
-        font-size: 3.3vmin;
+        width: 22vmin;
+        height: 22vmin;
+        position: absolute;
+        left: 0;
     }
     .forecastHigh {
-        font-size: 5vmin;
+        font-weight: 500;
+        vertical-align: super;
+    }
+    .forecastHighLowSeparater {
     }
     .forecastLow {
-        font-size: 5vmin;
+        vertical-align: sub;
+    }
+    .forecastConditions {
+        font-size: 4vmin;
     }
 </style>
 <div class="date">
@@ -67,28 +72,18 @@
 </div>
 <div class="weather">
     <div id="today" class="forecast">
-        <img id="forecastTodayIcon" class="forecastIcon">
-        <div class="forecastData">
-            <div id="forecastTodayDay" class="forecastDay"></div>
-            <div class="forecastHigh">
-                <span id="forecastTodayHigh"></span>&deg;<span class="weatherUnit">F</span>
-            </div>
-            <div class="forecastLow">
-                <span id="forecastTodayLow"></span>&deg;<span class="weatherUnit">F</span>
-            </div>
-        </div>
+        <img class="forecastIcon">
+        <span class="forecastHigh"><span class="forecastHighTemp">212</span>&deg;</span>
+        <span class="forecastHighLowSeparater">/</span>
+        <span class="forecastLow"><span class="forecastLowTemp">32</span>&deg;</span>
+        <div class="forecastConditions">Saturday: Thunderstorms</div>
     </div>
     <div id="tomorrow" class="forecast">
-        <img id="forecastTomorrowIcon" class="forecastIcon">
-        <div class="forecastData">
-            <div id="forecastTomorrowDay" class="forecastDay"></div>
-            <div class="forecastHigh">
-                <span id="forecastTomorrowHigh"></span>&deg;<span class="weatherUnit">F</span>
-            </div>
-            <div class="forecastLow">
-                <span id="forecastTomorrowLow"></span>&deg;<span class="weatherUnit">F</span>
-            </div>
-        </div>
+        <img class="forecastIcon">
+        <span class="forecastHigh"><span class="forecastHighTemp">212</span>&deg;</span>
+        <span class="forecastHighLowSeparater">/</span>
+        <span class="forecastLow"><span class="forecastLowTemp">32</span>&deg;</span>
+        <div class="forecastConditions">Saturday: Thunderstorms</div>
     </div>
 </div>
 <script>
@@ -125,7 +120,7 @@
         minute.innerText = (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
     }
 
-    function getForecast(callback) {
+    function getForecast(useCelsius, callback) {
         // API key from https://www.wunderground.com/weather/api
         var apiKey = 'do_not_use_18dc12c420cff7c6';
         var forecastUrl = 'http://api.wunderground.com/api/' + apiKey + '/forecast/q/autoip.json';
@@ -139,12 +134,14 @@
                 callback({
                     today: {
                         day: today.date.weekday,
+                        conditions: today.conditions,
                         high: useCelsius ? today.high.celsius : today.high.fahrenheit,
                         low: useCelsius ? today.low.celsius : today.low.fahrenheit,
                         icon: today.icon
                     },
                     tomorrow: {
                         day: tomorrow.date.weekday,
+                        conditions: tomorrow.conditions,
                         high: useCelsius ? tomorrow.high.celsius : tomorrow.high.fahrenheit,
                         low: useCelsius ? tomorrow.low.celsius : tomorrow.low.fahrenheit,
                         icon: tomorrow.icon
@@ -155,38 +152,39 @@
                 callback({
                     today: {
                         day: 'Someday',
+                        conditions: 'Partly Cloudy',
                         high: useCelsius ? '100' : '212',
                         low: useCelsius ? '0' : '32',
                         icon: 'tstorms'
                     },
                     tomorrow: {
                         day: 'Someday',
-                        high: useCelsius ? '21' : '70',
-                        low: useCelsius ? '18' : '65',
-                        icon: 'cloudy'
+                        conditions: 'Clear',
+                        high: useCelsius ? '21' : '7',
+                        low: useCelsius ? '18' : '6',
+                        icon: 'sunny'
                     }
                 });
             });
     }
 
     function updateWeather() {
-        getForecast(function(forecast) {
-            forecastTodayIcon.src = 'http://icons.wxug.com/i/c/k/' + forecast.today.icon + '.gif';
-            forecastTodayDay.innerText = forecast.today.day;
-            forecastTodayHigh.innerText = forecast.today.high;
-            forecastTodayLow.innerText = forecast.today.low;
-            forecastTomorrowIcon.src = 'http://icons.wxug.com/i/c/k/' + forecast.tomorrow.icon + '.gif';
-            forecastTomorrowDay.innerText = forecast.tomorrow.day;
-            forecastTomorrowHigh.innerText = forecast.tomorrow.high;
-            forecastTomorrowLow.innerText = forecast.tomorrow.low;
-
-            var unitElements = document.getElementsByClassName('weatherUnit');
-            for (var unitElement in unitElements)
-                unitElements[unitElement].innerText = useCelsius ? 'C' : 'F';
+        var useCelsius = false;
+        getForecast(useCelsius, function(forecast) {
+            ['today', 'tomorrow'].forEach(function(day) {
+                var forecastDay = document.getElementById(day);
+                var icon = forecastDay.getElementsByClassName('forecastIcon')[0];
+                icon.src = 'http://icons.wxug.com/i/c/k/' + forecast[day].icon + '.gif';
+                var high = forecastDay.getElementsByClassName('forecastHighTemp')[0];
+                high.innerText = forecast[day].high;
+                var low = forecastDay.getElementsByClassName('forecastLowTemp')[0];
+                low.innerText = forecast[day].low;
+                var conditions = forecastDay.getElementsByClassName('forecastConditions')[0];
+                conditions.innerText = forecast[day].day + ': ' + forecast[day].conditions;
+            });
         });
     }
 
-    var useCelsius = false;
     window.setInterval(updateDateTime, 1000); // Update date&time once per second (1000ms).
     updateDateTime(); // Immediately update once so the date&time is correct for the first frame.
     window.setInterval(updateWeather, 14400000); // Update weather every 4 hours (4*60*60*1000ms).
