@@ -30,9 +30,11 @@
     .temperatureLabel {
         padding-right: 5vmin;
     }
-    .wunderground {
+    .weather {
         padding-top: 10vmin;
-        /* The Wunderground API TOS requires attribution. */
+
+        /* The Wunderground API requires an attribution image. */
+        /* https://www.wunderground.com/weather/api/d/terms.html */
         background-image: url('wundergroundLogo.png');
         background-position: bottom right;
         background-repeat: no-repeat;
@@ -63,7 +65,7 @@
 <div class="time">
     <span id="hour">5</span><span id="timeColon">:</span><span id="minute">21</span>
 </div>
-<div class="wunderground">
+<div class="weather">
     <div id="today" class="forecast">
         <img id="forecastTodayIcon" class="forecastIcon">
         <div class="forecastData">
