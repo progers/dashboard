@@ -144,26 +144,10 @@
         minute.innerText = (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
     }
 
-    // Use the Wunderground geoip service to lookup our location, falls back to new york.
-    // This has been implemented as a function so the javascript geolocation API can be subbed in.
-    function getLocation(callback) {
-        var locationUrl = 'http://api.wunderground.com/api/' + wundergroundApiKey + '/geolookup/q/autoip.json';
-        var locationRequest = new Request(locationUrl);
-        fetch(locationRequest)
-            .then(function(response) {
-                return response.json();
-            }).then(function(json) {
-                var lat = json.location.lat;
-                var lon = json.location.lon;
-                callback({lat: lat, lon: lon});
-            }).catch(function(error) {
-                console.error('Could not determine location, falling back to New York, USA.');
-                callback({lat: '40.730610', lon: '-73.935242'});
-            });
-    }
-
-    function getForecast(location, callback) {
-        var forecastUrl = 'http://api.wunderground.com/api/' + wundergroundApiKey + '/forecast/q/' + location.lat + ',' +location.lon + '.json';
+    function getForecast(callback) {
+        // From https://www.wunderground.com/weather/api
+        var apiKey = 'do_not_use_18dc12c420cff7c6';
+        var forecastUrl = 'http://api.wunderground.com/api/' + apiKey + '/forecast/q/autoip.json';
         var forecastRequest = new Request(forecastUrl);
         fetch(forecastRequest)
             .then(function(response) {
@@ -205,27 +189,24 @@
     }
 
     function updateWeather() {
-        getLocation(function(location) {
-            getForecast(location, function(forecast) {
-                forecastTodayIcon.src = 'http://icons.wxug.com/i/c/k/' + forecast.today.icon + '.gif';
-                forecastTodayDay.innerText = forecast.today.day;
-                forecastTodayHighF.innerText = forecast.today.highF;
-                forecastTodayHighC.innerText = forecast.today.highC;
-                forecastTodayLowF.innerText = forecast.today.lowF;
-                forecastTodayLowC.innerText = forecast.today.lowC;
-                forecastTomorrowIcon.src = 'http://icons.wxug.com/i/c/k/' + forecast.tomorrow.icon + '.gif';
-                forecastTomorrowDay.innerText = forecast.tomorrow.day;
-                forecastTomorrowHighF.innerText = forecast.tomorrow.highF;
-                forecastTomorrowHighC.innerText = forecast.tomorrow.highC;
-                forecastTomorrowLowF.innerText = forecast.tomorrow.lowF;
-                forecastTomorrowLowC.innerText = forecast.tomorrow.lowC;
-            });
+        getForecast(function(forecast) {
+            forecastTodayIcon.src = 'http://icons.wxug.com/i/c/k/' + forecast.today.icon + '.gif';
+            forecastTodayDay.innerText = forecast.today.day;
+            forecastTodayHighF.innerText = forecast.today.highF;
+            forecastTodayHighC.innerText = forecast.today.highC;
+            forecastTodayLowF.innerText = forecast.today.lowF;
+            forecastTodayLowC.innerText = forecast.today.lowC;
+            forecastTomorrowIcon.src = 'http://icons.wxug.com/i/c/k/' + forecast.tomorrow.icon + '.gif';
+            forecastTomorrowDay.innerText = forecast.tomorrow.day;
+            forecastTomorrowHighF.innerText = forecast.tomorrow.highF;
+            forecastTomorrowHighC.innerText = forecast.tomorrow.highC;
+            forecastTomorrowLowF.innerText = forecast.tomorrow.lowF;
+            forecastTomorrowLowC.innerText = forecast.tomorrow.lowC;
         });
     }
 
     window.setInterval(updateDateTime, 1000); // Update date&time once per second (1000ms).
     updateDateTime(); // Immediately update once so the date&time is correct for the first frame.
-    var wundergroundApiKey = 'do_not_use_18dc12c420cff7c6'; // From https://www.wunderground.com/weather/api
     window.setInterval(updateWeather, 14400000); // Update weather every 4 hours (4*60*60*1000ms).
     updateWeather(); // Immediately update once so the weather is correct for the first frame.
 </script>
