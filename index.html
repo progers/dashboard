@@ -39,6 +39,7 @@
         width: 90px;
         left: 0;
         bottom: 0;
+        margin: 10px;
     }
     .forecast {
         font-size: 10vmin;
@@ -123,7 +124,7 @@
 
     function getForecast(useCelsius, callback) {
         // API key from https://www.wunderground.com/weather/api
-        var apiKey = 'do_not_use_18dc12c420cff7c6';
+        var apiKey = '18dc12c420cff7c6';
         var forecastUrl = 'http://api.wunderground.com/api/' + apiKey + '/forecast/q/autoip.json';
         var forecastRequest = new Request(forecastUrl);
         fetch(forecastRequest)
@@ -153,7 +154,7 @@
                 callback({
                     today: {
                         day: 'Someday',
-                        conditions: 'Partly Cloudy',
+                        conditions: 'Thunderstorms',
                         high: useCelsius ? '100' : '212',
                         low: useCelsius ? '0' : '32',
                         icon: 'tstorms'
