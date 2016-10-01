@@ -1,0 +1,11 @@
+credits
+
+These icons are from:
+https://github.com/manifestinteractive/weather-underground-icons
+
+Credit for bundling them up:
+Peter Schmalfeldt / manifestinteractive
+
+Credit for designing them:
+Ashley Jager / http://www.ajager.com/#/weather-underground
+

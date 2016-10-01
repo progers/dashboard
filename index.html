@@ -174,7 +174,7 @@
             ['today', 'tomorrow'].forEach(function(day) {
                 var forecastDay = document.getElementById(day);
                 var icon = forecastDay.getElementsByClassName('forecastIcon')[0];
-                icon.src = 'http://icons.wxug.com/i/c/k/' + forecast[day].icon + '.gif';
+                icon.src = 'icons/' + forecast[day].icon + '.svg';
                 var high = forecastDay.getElementsByClassName('forecastHighTemp')[0];
                 high.innerText = forecast[day].high;
                 var low = forecastDay.getElementsByClassName('forecastLowTemp')[0];
