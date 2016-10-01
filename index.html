@@ -125,7 +125,7 @@
     function getForecast(useCelsius, callback) {
         // API key from https://www.wunderground.com/weather/api
         var apiKey = '18dc12c420cff7c6';
-        var forecastUrl = 'http://api.wunderground.com/api/' + apiKey + '/forecast/q/autoip.json';
+        var forecastUrl = 'https://api.wunderground.com/api/' + apiKey + '/forecast/q/autoip.json';
         var forecastRequest = new Request(forecastUrl);
         fetch(forecastRequest)
             .then(function(response) {
