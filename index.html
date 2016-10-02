@@ -99,12 +99,19 @@
         return months[date.getMonth()];
     }
 
-    // Credit for this ordinal code:
-    // https://ecommerce.shopify.com/c/ecommerce-design/t/ordinal-number-in-javascript-1st-2nd-3rd-4th-29259
-    var ordinals = ['th', 'st', 'nd', 'rd'];
+    // Return the English ordinal for a number.
     function ordinal(number) {
-        var v = number % 100;
-        return ordinals[(v-20)%10] || ordinals[v] || ordinals[0];
+        // The general ordinal pattern in English:
+        //   number ends in 1 -> st (e.g., 31st)
+        //   number ends in 2 -> nd (e.g., 32nd)
+        //   number ends in 3 -> rd (e.g., 33rd)
+        // 11, 12, and 13 are exceptions and just use 'th'.
+        switch(number % 10) {
+            case(1): if (number == 11) { break; } else { return 'st' };
+            case(2): if (number == 12) { break; } else { return 'nd' };
+            case(3): if (number == 13) { break; } else { return 'rd' };
+        }
+        return 'th';
     }
 
     function updateDateTime() {
