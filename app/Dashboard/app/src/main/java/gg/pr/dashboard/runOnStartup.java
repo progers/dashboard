@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 
 public class runOnStartup extends BroadcastReceiver {
-
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
@@ -14,5 +13,4 @@ public class runOnStartup extends BroadcastReceiver {
             context.startActivity(i);
         }
     }
-
 }
