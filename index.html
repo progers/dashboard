@@ -200,4 +200,5 @@
     updateDateTime(); // Immediately update once so the date&time is correct for the first frame.
     window.setInterval(updateWeather, 14400000); // Update weather every 4 hours (4*60*60*1000ms).
     updateWeather(); // Immediately update once so the weather is correct for the first frame.
+    window.setInterval(function() { location.reload(); }, 86400000); // Refresh every day (24*60*60*1000ms).
 </script>
