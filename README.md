@@ -12,7 +12,7 @@ This is a simple smart mirror built from:
 
 5. Black [construction paper](https://www.amazon.com/gp/product/B00563PXHQ), taped behind the mirror for an even background.
 
-!["https://pr.gg/finished.jpg"](https://pr.gg/finished.jpg)
+![](https://pr.gg/dashboard/finished.jpg)
 
 Credit to [Becky Stern](https://learn.adafruit.com/android-smart-home-mirror)'s article for the idea.
 
