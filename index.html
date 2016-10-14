@@ -103,15 +103,15 @@
 
     // Return the English ordinal for a number.
     function ordinal(number) {
-        // The general ordinal pattern in English:
+        // The general pattern:
         //   number ends in 1 -> st (e.g., 31st)
         //   number ends in 2 -> nd (e.g., 32nd)
         //   number ends in 3 -> rd (e.g., 33rd)
         // 11, 12, and 13 are exceptions and just use 'th'.
         switch(number % 10) {
-            case(1): if (number == 11) { break; } else { return 'st' };
-            case(2): if (number == 12) { break; } else { return 'nd' };
-            case(3): if (number == 13) { break; } else { return 'rd' };
+            case(1): if (number % 100 == 11) { break; } else { return 'st' };
+            case(2): if (number % 100 == 12) { break; } else { return 'nd' };
+            case(3): if (number % 100 == 13) { break; } else { return 'rd' };
         }
         return 'th';
     }
