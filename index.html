@@ -129,6 +129,13 @@
         var colonVisible = date.getSeconds() % 2 === 0;
         timeColon.style.color = colonVisible ? 'white' : 'black';
         minute.innerText = (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
+
+        // Fade the display at night.
+        var fadeStartHours = 23;
+        var fadeEndHours = 6;
+        var fadedOpacity = 0.2;
+        var fade = (date.getHours() >= fadeStartHours || date.getHours() <= fadeEndHours);
+        document.body.style.opacity = fade ? fadedOpacity : 1;
     }
 
     function getForecast(useCelsius, callback) {
