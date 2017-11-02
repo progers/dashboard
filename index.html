@@ -30,20 +30,12 @@
     }
     .weather {
         display: inline-block;
-        position: relative;
         text-align: center;
     }
-    #wunderground {
-        /* The Wunderground API requires an attribution image. */
-        /* https://www.wunderground.com/weather/api/d/terms.html */
-        position: absolute;
-        width: 90px;
-        left: 0;
-        bottom: 0;
-        margin: 10px;
-    }
     .forecast {
-        font-size: 10vmin;
+        position: relative;
+        max-width: 70vmin;
+        font-size: 14vmin;
         /* Leave space for icons. */
         padding-left: 24vmin;
         min-height: 24vmin;
@@ -56,19 +48,16 @@
         height: 24vmin;
         position: absolute;
         left: 0;
+        /* center vertically */
+        top: 50%;
+        transform: translate(0, -50%);
     }
-    .forecastHigh {
+    .forecastTemp {
         font-weight: 600;
-        vertical-align: super;
     }
-    .forecastHighLowSeparater {
-        font-weight: 300;
-    }
-    .forecastLow {
-        vertical-align: sub;
-    }
-    .forecastConditions {
-        font-size: 4vmin;
+    .forecastDetails {
+        font-size: 3vmin;
+        margin-top: -2vmin;
     }
 </style>
 <div class="date">
@@ -78,18 +67,17 @@
     <span id="hour">5</span><span id="timeColon">:</span><span id="minute">21</span>
 </div>
 <div class="weather">
-    <div id="today" class="forecast">
+    <div id="current" class="forecast">
         <img class="forecastIcon">
-        <span class="forecastHigh"><span class="forecastHighTemp">212</span>&deg;</span><span class="forecastHighLowSeparater">/</span><span class="forecastLow"><span class="forecastLowTemp">32</span>&deg;</span>
-        <div class="forecastConditions">Saturday: Thunderstorms</div>
+        <span class="forecastTemp">70</span>
+        <div class="forecastDetails">Current: Unknown</div>
     </div>
-    <div id="tomorrow" class="forecast">
+    <div id="next" class="forecast">
         <img class="forecastIcon">
-        <span class="forecastHigh"><span class="forecastHighTemp">212</span>&deg;</span><span class="forecastHighLowSeparater">/</span><span class="forecastLow"><span class="forecastLowTemp">32</span>&deg;</span>
-        <div class="forecastConditions">Saturday: Thunderstorms</div>
+        <span class="forecastTemp">70</span>
+        <div class="forecastDetails">Next: Unknown</div>
     </div>
 </div>
-<img id="wunderground" src="wundergroundLogo.png">
 <script>
     var weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     function dayOfWeekName(date) {
@@ -138,67 +126,104 @@
         document.body.style.opacity = fade ? fadedOpacity : 1;
     }
 
-    function getForecast(useCelsius, callback) {
-        // API key from https://www.wunderground.com/weather/api
-        var apiKey = '18dc12c420cff7c6';
-        var forecastUrl = 'https://api.wunderground.com/api/' + apiKey + '/forecast/q/autoip.json';
+    function parseForecast(forecast) {
+        // Icon urls from https://api.weather.gov/icons
+        var iconUrlMap = {
+            'skc': 'clear.svg',
+            'few': 'mostlysunny.svg',
+            'sct': 'partlycloudy.svg',
+            'bkn': 'mostlycloudy.svg',
+            'ovc': 'cloudy.svg',
+            'wind_skc': 'clear.svg',
+            'wind_few': 'mostlysunny.svg',
+            'wind_sct': 'partlycloudy.svg',
+            'wind_bkn': 'cloudy.svg',
+            'wind_ovc': 'cloudy.svg',
+            'snow': 'snow.svg',
+            'rain_snow': 'sleet.svg',
+            'rain_sleet': 'sleet.svg',
+            'snow_sleet': 'sleet.svg',
+            'fzra': 'sleet.svg',
+            'rain_fzra': 'sleet.svg',
+            'snow_fzra': 'sleet.svg',
+            'sleet': 'sleet.svg',
+            'rain': 'rain.svg',
+            'rain_showers': 'rain.svg',
+            'rain_showers_hi': 'rain.svg',
+            'tsra': 'tstorms.svg',
+            'tsra_sct': 'tstorms.svg',
+            'tsra_hi': 'tstorms.svg',
+            'tornado': 'unknown.svg',
+            'hurr_warn': 'tstorms.svg',
+            'hurr_watch': 'tstorms.svg',
+            'ts_warn': 'tstorms.svg',
+            'ts_watch': 'tstorms.svg',
+            'ts_hurr_warn': 'tstorms.svg',
+            'dust': 'hazy.svg',
+            'smoke': 'hazy.svg',
+            'haze': 'hazy.svg',
+            'hot': 'clear.svg',
+            'cold': 'clear.svg',
+            'blizzard': 'snow.svg',
+            'fog': 'fog.svg'
+        };
+        var icon = 'unknown.svg';
+        for (var iconUrl in iconUrlMap) {
+            if (forecast.icon.indexOf('/' + iconUrl) !== -1) {
+                icon = iconUrlMap[iconUrl];
+                break;
+            }
+        }
+        return {
+            name: forecast.name,
+            temperature: forecast.temperature,
+            conditions: forecast.shortForecast,
+            icon: icon
+        };
+    }
+
+    function getForecast(callback) {
+        var latitude = '37.7746088';
+        var longitude = '-122.3957547';
+        // See: https://forecast-v3.weather.gov/documentation
+        var forecastUrl = 'https://api.weather.gov/points/' + latitude + ',' + longitude + '/forecast';
         var forecastRequest = new Request(forecastUrl);
         fetch(forecastRequest)
             .then(function(response) {
                 return response.json();
             }).then(function(json) {
-                var today = json.forecast.simpleforecast.forecastday[0];
-                var tomorrow = json.forecast.simpleforecast.forecastday[1];
                 callback({
-                    today: {
-                        day: today.date.weekday,
-                        conditions: today.conditions,
-                        high: useCelsius ? today.high.celsius : today.high.fahrenheit,
-                        low: useCelsius ? today.low.celsius : today.low.fahrenheit,
-                        icon: today.icon
-                    },
-                    tomorrow: {
-                        day: tomorrow.date.weekday,
-                        conditions: tomorrow.conditions,
-                        high: useCelsius ? tomorrow.high.celsius : tomorrow.high.fahrenheit,
-                        low: useCelsius ? tomorrow.low.celsius : tomorrow.low.fahrenheit,
-                        icon: tomorrow.icon
-                    }
+                    current: parseForecast(json.properties.periods[0]),
+                    next: parseForecast(json.properties.periods[1])
                 });
             }).catch(function(error) {
-                console.error('Could not determine weather, falling back to dummy data.');
                 callback({
-                    today: {
-                        day: 'Someday',
-                        conditions: 'Thunderstorms',
-                        high: useCelsius ? '100' : '212',
-                        low: useCelsius ? '0' : '32',
-                        icon: 'tstorms'
+                    current: {
+                        name: 'Current',
+                        temperature: '70',
+                        conditions: 'Unknown',
+                        icon: 'unknown.svg'
                     },
-                    tomorrow: {
-                        day: 'Someday',
-                        conditions: 'Clear',
-                        high: useCelsius ? '21' : '7',
-                        low: useCelsius ? '18' : '6',
-                        icon: 'sunny'
+                    next: {
+                        name: 'Next',
+                        temperature: '70',
+                        conditions: 'Unknown',
+                        icon: 'unknown.svg'
                     }
                 });
             });
     }
 
     function updateWeather() {
-        var useCelsius = false;
-        getForecast(useCelsius, function(forecast) {
-            ['today', 'tomorrow'].forEach(function(day) {
-                var forecastDay = document.getElementById(day);
+        getForecast(function(forecast) {
+            ['current', 'next'].forEach(function(period) {
+                var forecastDay = document.getElementById(period);
                 var icon = forecastDay.getElementsByClassName('forecastIcon')[0];
-                icon.src = 'icons/' + forecast[day].icon + '.svg';
-                var high = forecastDay.getElementsByClassName('forecastHighTemp')[0];
-                high.innerText = forecast[day].high;
-                var low = forecastDay.getElementsByClassName('forecastLowTemp')[0];
-                low.innerText = forecast[day].low;
-                var conditions = forecastDay.getElementsByClassName('forecastConditions')[0];
-                conditions.innerText = forecast[day].day + ': ' + forecast[day].conditions;
+                icon.src = 'icons/' + forecast[period].icon;
+                var temp = forecastDay.getElementsByClassName('forecastTemp')[0];
+                temp.innerText = forecast[period].temperature + '°';
+                var details = forecastDay.getElementsByClassName('forecastDetails')[0];
+                details.innerText = forecast[period].name + ': ' + forecast[period].conditions;
             });
         });
     }
