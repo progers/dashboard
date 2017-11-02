@@ -19,6 +19,7 @@
     }
     #timeColon {
         vertical-align: 1vmin;
+        will-change: opacity;
     }
     .date {
         font-size: 6vmin;
@@ -36,6 +37,7 @@
         position: relative;
         max-width: 70vmin;
         font-size: 14vmin;
+        margin-top: 1vmin;
         /* Leave space for icons. */
         padding-left: 24vmin;
         min-height: 24vmin;
@@ -115,7 +117,7 @@
         hour.innerText = date.getHours();
         // Make the colon white on even seconds, black on odd seconds.
         var colonVisible = date.getSeconds() % 2 === 0;
-        timeColon.style.color = colonVisible ? 'white' : 'black';
+        timeColon.style.opacity = colonVisible ? '0.99' : '0';
         minute.innerText = (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
 
         // Fade the display at night.
