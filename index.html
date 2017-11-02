@@ -43,7 +43,7 @@
     .weather .forecast:not(:first-child) {
         margin-top: 4vmin;
     }
-    .forecastIcon {
+    .icon {
         width: 24vmin;
         height: 24vmin;
         position: absolute;
@@ -52,10 +52,10 @@
         top: 50%;
         transform: translate(0, -50%);
     }
-    .forecastTemp {
+    .temp {
         font-weight: 600;
     }
-    .forecastDetails {
+    .details {
         font-size: 3vmin;
         margin-top: -2vmin;
     }
@@ -68,14 +68,14 @@
 </div>
 <div class="weather">
     <div id="current" class="forecast">
-        <img class="forecastIcon">
-        <span class="forecastTemp">70</span>
-        <div class="forecastDetails">Current: Unknown</div>
+        <img class="icon">
+        <span class="temp">70</span>
+        <div class="details">Current: Unknown</div>
     </div>
     <div id="next" class="forecast">
-        <img class="forecastIcon">
-        <span class="forecastTemp">70</span>
-        <div class="forecastDetails">Next: Unknown</div>
+        <img class="icon">
+        <span class="temp">70</span>
+        <div class="details">Next: Unknown</div>
     </div>
 </div>
 <script>
@@ -126,111 +126,103 @@
         document.body.style.opacity = fade ? fadedOpacity : 1;
     }
 
-    function parseForecast(forecast) {
-        // Icon urls from https://api.weather.gov/icons
-        var iconUrlMap = {
-            'skc': 'clear.svg',
-            'few': 'mostlysunny.svg',
-            'sct': 'partlycloudy.svg',
-            'bkn': 'mostlycloudy.svg',
-            'ovc': 'cloudy.svg',
-            'wind_skc': 'clear.svg',
-            'wind_few': 'mostlysunny.svg',
-            'wind_sct': 'partlycloudy.svg',
-            'wind_bkn': 'cloudy.svg',
-            'wind_ovc': 'cloudy.svg',
-            'snow': 'snow.svg',
-            'rain_snow': 'sleet.svg',
-            'rain_sleet': 'sleet.svg',
-            'snow_sleet': 'sleet.svg',
-            'fzra': 'sleet.svg',
-            'rain_fzra': 'sleet.svg',
-            'snow_fzra': 'sleet.svg',
-            'sleet': 'sleet.svg',
-            'rain': 'rain.svg',
-            'rain_showers': 'rain.svg',
-            'rain_showers_hi': 'rain.svg',
-            'tsra': 'tstorms.svg',
-            'tsra_sct': 'tstorms.svg',
-            'tsra_hi': 'tstorms.svg',
-            'tornado': 'unknown.svg',
-            'hurr_warn': 'tstorms.svg',
-            'hurr_watch': 'tstorms.svg',
-            'ts_warn': 'tstorms.svg',
-            'ts_watch': 'tstorms.svg',
-            'ts_hurr_warn': 'tstorms.svg',
-            'dust': 'hazy.svg',
-            'smoke': 'hazy.svg',
-            'haze': 'hazy.svg',
-            'hot': 'clear.svg',
-            'cold': 'clear.svg',
-            'blizzard': 'snow.svg',
-            'fog': 'fog.svg'
-        };
-        var icon = 'unknown.svg';
-        for (var iconUrl in iconUrlMap) {
-            if (forecast.icon.indexOf('/' + iconUrl) !== -1) {
-                icon = iconUrlMap[iconUrl];
-                break;
+    // Callback with the current and next forecast for the given lat/lon. The forecasts
+    // have a name, temperature, shortForecast (description), and icon.
+    // This uses api.weather.gov, see: https://forecast-v3.weather.gov/documentation
+    function getForecast(latitude, longitude, callback) {
+        // Convert from the weather.gov icons (api.weather.gov/icons) to one of our svg icons.
+        function updateIconUrl(forecastPeriod) {
+            var iconUrlMap = {
+                'skc': 'clear.svg',
+                'few': 'mostlysunny.svg',
+                'sct': 'partlycloudy.svg',
+                'bkn': 'mostlycloudy.svg',
+                'ovc': 'cloudy.svg',
+                'wind_skc': 'clear.svg',
+                'wind_few': 'mostlysunny.svg',
+                'wind_sct': 'partlycloudy.svg',
+                'wind_bkn': 'cloudy.svg',
+                'wind_ovc': 'cloudy.svg',
+                'snow': 'snow.svg',
+                'rain_snow': 'sleet.svg',
+                'rain_sleet': 'sleet.svg',
+                'snow_sleet': 'sleet.svg',
+                'fzra': 'sleet.svg',
+                'rain_fzra': 'sleet.svg',
+                'snow_fzra': 'sleet.svg',
+                'sleet': 'sleet.svg',
+                'rain': 'rain.svg',
+                'rain_showers': 'rain.svg',
+                'rain_showers_hi': 'rain.svg',
+                'tsra': 'tstorms.svg',
+                'tsra_sct': 'tstorms.svg',
+                'tsra_hi': 'tstorms.svg',
+                'tornado': 'unknown.svg',
+                'hurr_warn': 'tstorms.svg',
+                'hurr_watch': 'tstorms.svg',
+                'ts_warn': 'tstorms.svg',
+                'ts_watch': 'tstorms.svg',
+                'ts_hurr_warn': 'tstorms.svg',
+                'dust': 'hazy.svg',
+                'smoke': 'hazy.svg',
+                'haze': 'hazy.svg',
+                'hot': 'clear.svg',
+                'cold': 'clear.svg',
+                'blizzard': 'snow.svg',
+                'fog': 'fog.svg'
+            };
+            var icon = 'unknown.svg';
+            for (var iconUrl in iconUrlMap) {
+                if (forecastPeriod.icon.indexOf('/' + iconUrl) !== -1) {
+                    icon = iconUrlMap[iconUrl];
+                    break;
+                }
             }
+            forecastPeriod.icon = icon;
+            return forecastPeriod;
         }
-        return {
-            name: forecast.name,
-            temperature: forecast.temperature,
-            conditions: forecast.shortForecast,
-            icon: icon
-        };
-    }
 
-    function getForecast(callback) {
-        var latitude = '37.7746088';
-        var longitude = '-122.3957547';
-        // See: https://forecast-v3.weather.gov/documentation
         var forecastUrl = 'https://api.weather.gov/points/' + latitude + ',' + longitude + '/forecast';
         var forecastRequest = new Request(forecastUrl);
         fetch(forecastRequest)
             .then(function(response) {
                 return response.json();
             }).then(function(json) {
-                callback({
-                    current: parseForecast(json.properties.periods[0]),
-                    next: parseForecast(json.properties.periods[1])
-                });
+                var current = updateIconUrl(json.properties.periods[0]);
+                var next = updateIconUrl(json.properties.periods[1]);
+                callback(current, next);
             }).catch(function(error) {
-                callback({
-                    current: {
-                        name: 'Current',
-                        temperature: '70',
-                        conditions: 'Unknown',
-                        icon: 'unknown.svg'
-                    },
-                    next: {
-                        name: 'Next',
-                        temperature: '70',
-                        conditions: 'Unknown',
-                        icon: 'unknown.svg'
-                    }
-                });
+                var errorForecast = {
+                    name: 'Unknown',
+                    temperature: '70',
+                    shortForecast: 'Unknown',
+                    icon: 'unknown.svg'
+                };
+                callback(errorForecast, errorForecast);
             });
     }
 
     function updateWeather() {
-        getForecast(function(forecast) {
-            ['current', 'next'].forEach(function(period) {
-                var forecastDay = document.getElementById(period);
-                var icon = forecastDay.getElementsByClassName('forecastIcon')[0];
-                icon.src = 'icons/' + forecast[period].icon;
-                var temp = forecastDay.getElementsByClassName('forecastTemp')[0];
-                temp.innerText = forecast[period].temperature + '°';
-                var details = forecastDay.getElementsByClassName('forecastDetails')[0];
-                details.innerText = forecast[period].name + ': ' + forecast[period].conditions;
-            });
+        var latitude = '37.7746088';
+        var longitude = '-122.3957547';
+        getForecast(latitude, longitude, function(currentForecast, nextForecast) {
+            function updateForecastDom(forecastElement, forecast) {
+                var iconElement = forecastElement.getElementsByClassName('icon')[0];
+                iconElement.src = 'icons/' + forecast.icon;
+                var tempElement = forecastElement.getElementsByClassName('temp')[0];
+                tempElement.innerText = forecast.temperature + '°';
+                var detailsElement = forecastElement.getElementsByClassName('details')[0];
+                detailsElement.innerText = forecast.name + ': ' + forecast.shortForecast;
+            }
+
+            updateForecastDom(document.getElementById('current'), currentForecast);
+            updateForecastDom(document.getElementById('next'), nextForecast);
         });
     }
 
     window.setInterval(updateDateTime, 1000); // Update date&time once per second (1000ms).
     updateDateTime(); // Immediately update once so the date&time is correct for the first frame.
-    window.setInterval(updateWeather, 14400000); // Update weather every 4 hours (4*60*60*1000ms).
+    window.setInterval(updateWeather, 3600000); // Update weather every hour (60*60*1000ms).
     updateWeather(); // Immediately update once so the weather is correct for the first frame.
     window.setInterval(function() { location.reload(); }, 86400000); // Refresh every day (24*60*60*1000ms).
 </script>
