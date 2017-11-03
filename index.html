@@ -19,6 +19,7 @@
     }
     #timeColon {
         vertical-align: 1vmin;
+        opacity: 0;
         will-change: opacity;
     }
     .date {
@@ -106,6 +107,12 @@
         return 'th';
     }
 
+    var colonVisible = false;
+    function updateTimeColon() {
+        colonVisible = !colonVisible;
+        timeColon.style.opacity = colonVisible ? '0.99' : '0';
+    }
+
     function updateDateTime() {
         var date = new Date();
 
@@ -115,9 +122,6 @@
         dayOfMonthOrdinal.innerText = ordinal(date.getDate());
 
         hour.innerText = date.getHours();
-        // Make the colon white on even seconds, black on odd seconds.
-        var colonVisible = date.getSeconds() % 2 === 0;
-        timeColon.style.opacity = colonVisible ? '0.99' : '0';
         minute.innerText = (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
 
         // Fade the display at night.
@@ -222,7 +226,8 @@
         });
     }
 
-    window.setInterval(updateDateTime, 1000); // Update date&time once per second (1000ms).
+    window.setInterval(updateTimeColon, 1000); // Update time colon once per second (1000ms).
+    window.setInterval(updateDateTime, 60000); // Update date&time once per minute (60*1000ms).
     updateDateTime(); // Immediately update once so the date&time is correct for the first frame.
     window.setInterval(updateWeather, 3600000); // Update weather every hour (60*60*1000ms).
     updateWeather(); // Immediately update once so the weather is correct for the first frame.
