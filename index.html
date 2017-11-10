@@ -22,6 +22,7 @@
         vertical-align: 1vmin;
         opacity: 0;
         will-change: opacity;
+        display: inline-block;
     }
     .date {
         font-size: 6vmin;
@@ -111,7 +112,7 @@
     var colonVisible = false;
     function updateTimeColon() {
         colonVisible = !colonVisible;
-        timeColon.style.opacity = colonVisible ? '0.99' : '0';
+        timeColon.style.opacity = colonVisible ? 1 : 0;
     }
 
     function updateDateTime() {
