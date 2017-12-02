@@ -126,12 +126,21 @@
         hour.innerText = date.getHours();
         minute.innerText = (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
 
-        // Fade the display at night.
-        var fadeStartHours = 23;
-        var fadeEndHours = 6;
-        var fadedOpacity = 0.2;
-        var fade = (date.getHours() >= fadeStartHours || date.getHours() <= fadeEndHours);
-        document.body.style.opacity = fade ? fadedOpacity : 1;
+        // Fade the display at night (before 6:00 and after 23:00).
+        var currentOpacity = 1;
+        var nightOpacity = 0.2;
+        if (date.getHours() <= 5) {
+            currentOpacity = nightOpacity;
+        } else if (date.getHours() <= 6) {
+            // Linearly interpolate between hours 5 and 6 to transition brighter.
+            currentOpacity = nightOpacity + (date.getHours() - 5) * (1 - nightOpacity);
+        } else if (date.getHours() <= 23) {
+            currentOpacity = 1;
+        } else {
+            // Linearly interpolate between hours 23 and 24 to transition darker.
+            currentOpacity = nightOpacity + (24 - date.getHours()) * (1 - nightOpacity);
+        }
+        document.body.style.opacity = currentOpacity;
     }
 
     // Callback with the current and next forecast for the given lat/lon. The forecasts
