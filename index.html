@@ -64,6 +64,13 @@
         font-size: 3vmin;
         margin-top: -2vmin;
     }
+
+    .christmas {
+        background-image: repeating-linear-gradient(90deg, red 0em, green 1em, red 2em);
+        color: transparent;
+        background-clip: text;
+        -webkit-background-clip: text;
+    }
 </style>
 <div class="date">
     <span id="day">Saturday</span>, <span id="month">Sep</span> <span id="dayOfMonth">10</span><span id="dayOfMonthOrdinal">st</span>
@@ -141,6 +148,11 @@
             currentOpacity = nightOpacity + (24 - date.getHours()) * (1 - nightOpacity);
         }
         document.body.style.opacity = currentOpacity;
+
+        // Add christmas color effect on December 24th and 25th.
+        if (date.getMonth() == 11 && (date.getDate() == 24 || date.getDate() == 25)) {
+            document.getElementsByClassName('date')[0].classList.add('christmas');
+        }
     }
 
     // Callback with the current and next forecast for the given lat/lon. The forecasts
