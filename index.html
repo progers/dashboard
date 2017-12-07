@@ -134,18 +134,19 @@
         minute.innerText = (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
 
         // Fade the display at night (before 7:00 and after 23:00).
-        var currentOpacity = 1;
+        var currentOpcity = 1;
         var nightOpacity = 0.2;
-        if (date.getHours() <= 7) {
+        var fractionalHours = date.getHours() + date.getMinutes() / 60;
+        if (fractionalHours <= 7) {
             currentOpacity = nightOpacity;
-        } else if (date.getHours() <= 8) {
+        } else if (fractionalHours <= 8) {
             // Linearly interpolate between hours 7 and 8 to transition brighter.
-            currentOpacity = nightOpacity + (date.getHours() - 7) * (1 - nightOpacity);
-        } else if (date.getHours() <= 23) {
+            currentOpacity = nightOpacity + (fractionalHours - 7) * (1 - nightOpacity);
+        } else if (fractionalHours <= 23) {
             currentOpacity = 1;
         } else {
             // Linearly interpolate between hours 23 and 24 to transition darker.
-            currentOpacity = nightOpacity + (24 - date.getHours()) * (1 - nightOpacity);
+            currentOpacity = nightOpacity + (24 - fractionalHours) * (1 - nightOpacity);
         }
         document.body.style.opacity = currentOpacity;
 
