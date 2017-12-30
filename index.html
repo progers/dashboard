@@ -134,8 +134,8 @@
         minute.innerText = (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
 
         // Fade the display at night (before 7:00 and after 23:00).
-        var currentOpcity = 1;
-        var nightOpacity = 0.2;
+        var currentOpacity = 1;
+        var nightOpacity = 0.4;
         var fractionalHours = date.getHours() + date.getMinutes() / 60;
         if (fractionalHours <= 7) {
             currentOpacity = nightOpacity;
