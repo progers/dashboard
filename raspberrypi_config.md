@@ -23,6 +23,13 @@ On startup, launch chromium in fullscreen mode (press alt+f4 to exit). Edit `/ho
 @/usr/bin/chromium-browser --kiosk --incognito https://pr.gg/dashboard
 ```
 
+To disable screen blanking, edit `/home/pi/.config/lxsession/LXDE-pi/autostart` and add:
+```
+@xset s noblank
+@xset s off
+@xset s -dpms
+```
+
 To hide the cursor, run `sudo apt-get install unclutter` and then edit `/home/pi/.config/lxsession/LXDE-pi/autostart` and add:
 ```
 @unclutter -idle 0.1 -root
