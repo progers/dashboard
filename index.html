@@ -166,7 +166,7 @@
         minute.innerText = (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
 
         // Fade the display brightness at night (before 7:00 and after 22:00).
-        document.body.style.opacity = brightness(date, 7, 22, 1, 0.2);
+        document.body.style.opacity = brightness(date, 7, 22, 1, 0.3);
 
         // Add christmas color effect on December 24th and 25th.
         if (date.getMonth() == 11 && (date.getDate() == 24 || date.getDate() == 25))
