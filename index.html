@@ -125,6 +125,35 @@
         timeColon.style.opacity = colonVisible ? 1 : 0;
     }
 
+    // Return an adjusted brightness level for the current date.
+    //
+    // dayLevel                   .---------------------.
+    //                           /                       \
+    //                          /                         \
+    // nightLevel -------------'                           '------------
+    //            ^           ^    ^                   ^    ^         ^
+    //            0 ... dayStart  dayStart+1 ... dayEnd-1  dayEnd ... 23
+    //
+    // dayStart and dayEnd are in units of hours. The brightness is smoothly
+    // transitioned over one hour.
+    function brightness(date, dayStart, dayEnd, dayLevel, nightLevel) {
+        // The current hour and minutes, in units of hours (0, 24].
+        var hours = date.getHours() + date.getMinutes() / 60;
+
+        // Night to day transition: linearly interpolate from start to start+1.
+        if (hours > dayStart && hours < dayStart + 1)
+            return nightLevel + (hours - dayStart) * (dayLevel - nightLevel);
+
+        if (hours >= dayStart + 1 && hours <= dayEnd - 1)
+            return dayLevel;
+
+        // Day to night transition: linearly interpolate from end-1 to end.
+        if (hours > dayEnd - 1 && hours < dayEnd)
+            return dayLevel + (hours - dayEnd + 1) * (nightLevel - dayLevel);
+
+        return nightLevel;
+    }
+
     function updateDateTime() {
         var date = new Date();
 
@@ -136,29 +165,12 @@
         hour.innerText = date.getHours();
         minute.innerText = (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
 
-        // Fade the display at night (before 7:00 and after 21:00).
-        var currentOpacity = 1;
-        var nightOpacity = 0.2;
-        var fractionalHours = date.getHours() + date.getMinutes() / 60;
-        if (fractionalHours <= 7) {
-            currentOpacity = nightOpacity;
-        } else if (fractionalHours <= 8) {
-            // Linearly interpolate between hours 7 and 8 to transition brighter.
-            currentOpacity = nightOpacity + (fractionalHours - 7) * (1 - nightOpacity);
-        } else if (fractionalHours <= 21) {
-            currentOpacity = 1;
-        } else if (fractionalHours <= 22) {
-            // Linearly interpolate between hours 21 and 22 to transition darker.
-            currentOpacity = nightOpacity + (22 - fractionalHours) * (1 - nightOpacity);
-        } else {
-            currentOpacity = nightOpacity;
-        }
-        document.body.style.opacity = currentOpacity;
+        // Fade the display brightness at night (before 7:00 and after 22:00).
+        document.body.style.opacity = brightness(date, 7, 22, 1, 0.2);
 
         // Add christmas color effect on December 24th and 25th.
-        if (date.getMonth() == 11 && (date.getDate() == 24 || date.getDate() == 25)) {
+        if (date.getMonth() == 11 && (date.getDate() == 24 || date.getDate() == 25))
             document.getElementsByClassName('date')[0].classList.add('christmas');
-        }
     }
 
     // Callback with the current and next forecast for the given lat/lon. The forecasts
